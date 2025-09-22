@@ -6,6 +6,64 @@
   
   <script>
 
+const handleResponse = (response) => {
+  response.text().then((resText) => {
+    console.log("Raw Response: " + resText);
+
+    const contentType = response.headers.get('Content-Type');
+    const content = document.querySelector('#content');
+    content.innerHTML = '';
+
+    const h1 = document.createElement('h1');
+    const p = document.createElement('p');
+
+    let message = '';
+    let id = '';
+
+    if (contentType === 'application/json') {
+      const parsed = JSON.parse(resText);
+      message = parsed.message;
+    } else if (contentType === 'text/xml') {
+      const parsed = new DOMParser().parseFromString(resText, 'text/xml');
+      message = parsed.querySelector('message').textContent;
+      const idTag = parsed.querySelector('id');
+      id = idTag ? idTag.textContent : ''; 
+    }
+
+   
+    let statusTitle = id || response.url.split('/').pop(); 
+    statusTitle = statusTitle.charAt(0).toUpperCase() + statusTitle.slice(1); 
+
+    h1.textContent = statusTitle;
+    p.textContent = `Message: ${message}`;
+
+    content.appendChild(h1);
+    content.appendChild(p);
+  });
+};
+
+
+
+const sendFetchRequest = ()=>{
+  
+  const statusurl = document.querySelector('#page').value;
+  const typeInfo = document.querySelector('#type').value;
+  const options = {
+    method:'GET',
+    headers: {'Accept':typeInfo},
+  }
+  const fetchPromise = fetch(statusurl,options);
+
+  fetchPromise.then((response)=>{handleResponse(response)});
+};    
+  const init = () =>{
+    const button = document.querySelector('#send');
+    button.addEventListener('click',sendFetchRequest);
+  };
+
+  window.onload=init;
+
+    
   </script>
 </head>
 <body>
