@@ -1,4 +1,3 @@
-const users = {};
 
 const respond = (request, response, status, object) => {
   const accept = request.headers.accept || 'application/json';
